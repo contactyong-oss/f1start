@@ -98,8 +98,22 @@ input {
 .leaderboard {
   margin-top: 24px;
   text-align: center;
+
+  max-height: 360px;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+  
+.leaderboard::-webkit-scrollbar {
+  width: 6px;
 }
 
+.leaderboard::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 4px;
+}
+
+  
 .rank-row {
   display: grid;
   grid-template-columns: 1fr auto auto;
@@ -458,15 +472,15 @@ async function saveRecord() {
 async function showLeaderboard() {
   leaderboardEl.classList.remove("hidden");
 
-  const q = query(
-    collection(db, "leaderboard"),
-    orderBy("time", "asc"),
-    limit(5)
-  );
+const q = query(
+  collection(db, "leaderboard"),
+  orderBy("time", "asc"),
+  limit(30)
+);
 
   const snap = await getDocs(q);
 
-  let html = `<h3>🏆 TOP 5 리더보드</h3>`;
+  let html = `<h3>🏆 TOP 리더보드</h3>`;
 
   if (snap.empty) {
     html += `<div class="small">아직 기록이 없습니다.</div>`;
