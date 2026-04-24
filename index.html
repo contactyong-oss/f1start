@@ -98,12 +98,11 @@ input {
 .leaderboard {
   margin-top: 24px;
   text-align: center;
-
   max-height: 360px;
   overflow-y: auto;
   padding-right: 6px;
 }
-  
+
 .leaderboard::-webkit-scrollbar {
   width: 6px;
 }
@@ -113,7 +112,6 @@ input {
   border-radius: 4px;
 }
 
-  
 .rank-row {
   display: grid;
   grid-template-columns: 1fr auto auto;
@@ -223,6 +221,10 @@ const submitName = document.getElementById("submitName");
 
 const leaderboardEl = document.getElementById("leaderboard");
 
+const FALSE_START_STORAGE_KEY = "f1_false_start_count";
+const FALSE_START_EXPIRE_KEY = "f1_false_start_expire_at";
+const FALSE_START_EXPIRE_MS = 30 * 60 * 1000;
+
 const lights = [];
 let bottomLights = [];
 
@@ -231,10 +233,6 @@ let waiting = false;
 
 let startTime = 0;
 let currentTime = 0;
-
-const FALSE_START_STORAGE_KEY = "f1_false_start_count";
-const FALSE_START_EXPIRE_KEY = "f1_false_start_expire_at";
-const FALSE_START_EXPIRE_MS = 30 * 60 * 1000; // 30분
 
 let falseStartCount = loadFalseStartCount();
 
@@ -250,23 +248,28 @@ for (let i = 0; i < 10; i++) {
 bottomLights = lights.slice(5, 10);
 
 function loadFalseStartCount() {
-  const expireAt = Number(localStorage.getItem("f1_false_start_expire_at"));
+  const expireAt = Number(localStorage.getItem(FALSE_START_EXPIRE_KEY));
   const now = Date.now();
 
   if (!expireAt || now > expireAt) {
-    localStorage.removeItem("f1_false_start_count");
-    localStorage.removeItem("f1_false_start_expire_at");
+    localStorage.removeItem(FALSE_START_STORAGE_KEY);
+    localStorage.removeItem(FALSE_START_EXPIRE_KEY);
     return 0;
   }
 
-  return Number(localStorage.getItem("f1_false_start_count") || 0);
+  return Number(localStorage.getItem(FALSE_START_STORAGE_KEY) || 0);
 }
 
 function saveFalseStartCount() {
-  const expireAt = Date.now() + (30 * 60 * 1000);
+  const expireAt = Date.now() + FALSE_START_EXPIRE_MS;
 
-  localStorage.setItem("f1_false_start_count", String(falseStartCount));
-  localStorage.setItem("f1_false_start_expire_at", String(expireAt));
+  localStorage.setItem(FALSE_START_STORAGE_KEY, String(falseStartCount));
+  localStorage.setItem(FALSE_START_EXPIRE_KEY, String(expireAt));
+}
+
+function clearAllTimers() {
+  timeouts.forEach(t => clearTimeout(t));
+  timeouts = [];
 }
 
 function resetLights() {
@@ -492,15 +495,15 @@ async function saveRecord() {
 async function showLeaderboard() {
   leaderboardEl.classList.remove("hidden");
 
-const q = query(
-  collection(db, "leaderboard"),
-  orderBy("time", "asc"),
-  limit(30)
-);
+  const q = query(
+    collection(db, "leaderboard"),
+    orderBy("time", "asc"),
+    limit(30)
+  );
 
   const snap = await getDocs(q);
 
-  let html = `<h3>🏆 TOP 리더보드</h3>`;
+  let html = `<h3>🏆 TOP 30 리더보드</h3>`;
 
   if (snap.empty) {
     html += `<div class="small">아직 기록이 없습니다.</div>`;
