@@ -232,7 +232,11 @@ let waiting = false;
 let startTime = 0;
 let currentTime = 0;
 
-let falseStartCount = 0;
+const FALSE_START_STORAGE_KEY = "f1_false_start_count";
+const FALSE_START_EXPIRE_KEY = "f1_false_start_expire_at";
+const FALSE_START_EXPIRE_MS = 30 * 60 * 1000; // 30분
+
+let falseStartCount = loadFalseStartCount();
 
 let timeouts = [];
 
@@ -245,9 +249,24 @@ for (let i = 0; i < 10; i++) {
 
 bottomLights = lights.slice(5, 10);
 
-function clearAllTimers() {
-  timeouts.forEach(t => clearTimeout(t));
-  timeouts = [];
+function loadFalseStartCount() {
+  const expireAt = Number(localStorage.getItem("f1_false_start_expire_at"));
+  const now = Date.now();
+
+  if (!expireAt || now > expireAt) {
+    localStorage.removeItem("f1_false_start_count");
+    localStorage.removeItem("f1_false_start_expire_at");
+    return 0;
+  }
+
+  return Number(localStorage.getItem("f1_false_start_count") || 0);
+}
+
+function saveFalseStartCount() {
+  const expireAt = Date.now() + (30 * 60 * 1000);
+
+  localStorage.setItem("f1_false_start_count", String(falseStartCount));
+  localStorage.setItem("f1_false_start_expire_at", String(expireAt));
 }
 
 function resetLights() {
@@ -325,6 +344,7 @@ function startGame() {
 
 function falseStart() {
   falseStartCount++;
+  saveFalseStartCount();
 
   clearAllTimers();
   resetLights();
