@@ -6,71 +6,113 @@
 <title>F1 Reaction Game</title>
 
 <style>
+* { box-sizing: border-box; }
+
 body {
-  margin:0;
-  background:#111;
-  color:white;
-  font-family:sans-serif;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  height:100vh;
-  user-select:none;
-  cursor:pointer;
+  margin: 0;
+  min-height: 100vh;
+  background: #111;
+  color: white;
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  user-select: none;
+  cursor: pointer;
 }
 
 .game {
-  width:90%;
-  max-width:420px;
-  text-align:center;
+  width: 90%;
+  max-width: 420px;
+  text-align: center;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 900;
+  margin-bottom: 28px;
 }
 
 .lights {
-  display:grid;
-  grid-template-columns:repeat(5,1fr);
-  gap:12px;
-  margin-bottom:30px;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 30px;
 }
 
 .light {
-  aspect-ratio:1;
-  border-radius:50%;
-  background:#250000;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #250000;
+  box-shadow: inset 0 0 12px rgba(0,0,0,0.9);
 }
 
 .light.on {
-  background:red;
-  box-shadow:0 0 20px red;
+  background: red;
+  box-shadow: 0 0 20px red, 0 0 36px rgba(255,0,0,0.7);
 }
 
 .counter {
-  font-size:48px;
-  font-weight:900;
-  margin-bottom:20px;
+  font-size: 48px;
+  font-weight: 900;
+  margin-bottom: 18px;
+  letter-spacing: 2px;
+}
+
+.message {
+  min-height: 26px;
+  color: #ccc;
+  margin-bottom: 18px;
+  font-size: 16px;
 }
 
 .button {
-  padding:12px 20px;
-  font-size:16px;
-  font-weight:700;
-  border:none;
-  border-radius:20px;
-  cursor:pointer;
-  margin:6px;
+  padding: 12px 20px;
+  font-size: 16px;
+  font-weight: 800;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  margin: 6px;
 }
 
-.hidden { display:none; }
+.button:active {
+  transform: scale(0.96);
+}
+
+.hidden {
+  display: none;
+}
 
 input {
-  padding:10px;
-  font-size:16px;
-  margin-top:10px;
-  width:70%;
+  padding: 12px;
+  font-size: 16px;
+  margin-top: 10px;
+  width: 78%;
+  border-radius: 12px;
+  border: none;
+  text-align: center;
 }
 
 .leaderboard {
-  margin-top:20px;
-  text-align:left;
+  margin-top: 24px;
+  text-align: center;
+}
+
+.rank-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 14px;
+  margin: 8px 0;
+  background: #1d1d1d;
+  border-radius: 12px;
+}
+
+.small {
+  color: #aaa;
+  font-size: 14px;
+  margin-top: 10px;
 }
 </style>
 </head>
@@ -78,34 +120,46 @@ input {
 <body>
 
 <div class="game">
+  <div class="title">F1 반응속도 테스트</div>
 
   <div class="lights" id="lights"></div>
 
   <div class="counter" id="counter">0.0000</div>
 
+  <div class="message" id="message">START를 누르세요</div>
+
   <button class="button" id="startBtn">START</button>
 
   <div id="resultButtons" class="hidden">
     <button class="button" id="saveBtn">기록하기</button>
-    <button class="button" id="restartBtn">다시하기</button>
+    <button class="button" id="retryBtn">다시하기</button>
   </div>
 
   <div id="nameInputBox" class="hidden">
-    <div>이름 입력</div>
-    <input id="nameInput" placeholder="이름"/>
+    <div>이름을 입력하세요</div>
+    <input id="nameInput" placeholder="예: 홍길동" maxlength="20"/>
     <br/>
     <button class="button" id="submitName">확인</button>
   </div>
 
   <div id="leaderboard" class="leaderboard hidden"></div>
-
 </div>
 
 <script type="module">
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc, collection, query, orderBy, limit, getDocs } 
-from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-analytics.js";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc,
+  collection,
+  query,
+  orderBy,
+  limit,
+  getDocs,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCu0m7d1aLoaDiZ8aupYgHUSxVzb8rsKRc",
@@ -118,16 +172,19 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+getAnalytics(app);
+
 const db = getFirestore(app);
 
 const lightsEl = document.getElementById("lights");
 const counterEl = document.getElementById("counter");
+const messageEl = document.getElementById("message");
 
 const startBtn = document.getElementById("startBtn");
 const saveBtn = document.getElementById("saveBtn");
-const restartBtn = document.getElementById("restartBtn");
-
+const retryBtn = document.getElementById("retryBtn");
 const resultButtons = document.getElementById("resultButtons");
+
 const nameInputBox = document.getElementById("nameInputBox");
 const nameInput = document.getElementById("nameInput");
 const submitName = document.getElementById("submitName");
@@ -135,16 +192,17 @@ const submitName = document.getElementById("submitName");
 const leaderboardEl = document.getElementById("leaderboard");
 
 const lights = [];
-let bottomLights;
+let bottomLights = [];
 
 let running = false;
 let waiting = false;
+let gameActive = false;
+
 let startTime = 0;
 let currentTime = 0;
 
 let timeouts = [];
 
-// 라이트 생성
 for (let i = 0; i < 10; i++) {
   const el = document.createElement("div");
   el.className = "light";
@@ -163,12 +221,17 @@ function resetLights() {
   lights.forEach(l => l.classList.remove("on"));
 }
 
+function hideAllPanels() {
+  resultButtons.classList.add("hidden");
+  nameInputBox.classList.add("hidden");
+  leaderboardEl.classList.add("hidden");
+}
+
 function updateCounter() {
   if (!running) return;
 
   const diff = (performance.now() - startTime) / 1000;
   currentTime = diff;
-
   counterEl.textContent = diff.toFixed(4);
 
   requestAnimationFrame(updateCounter);
@@ -177,20 +240,23 @@ function updateCounter() {
 function startGame() {
   clearAllTimers();
   resetLights();
+  hideAllPanels();
 
   counterEl.textContent = "0.0000";
+  messageEl.textContent = "불이 꺼지면 클릭하세요";
 
   running = false;
   waiting = true;
+  gameActive = true;
+  currentTime = 0;
 
   startBtn.style.display = "none";
-  resultButtons.classList.add("hidden");
-  leaderboardEl.classList.add("hidden");
 
   let delay = 0;
 
   bottomLights.forEach(light => {
     const t = setTimeout(() => {
+      if (!waiting) return;
       light.classList.add("on");
     }, delay);
 
@@ -200,7 +266,9 @@ function startGame() {
 
   const randomDelay = Math.random() * 1000;
 
-  const final = setTimeout(() => {
+  const finalTimer = setTimeout(() => {
+    if (!waiting) return;
+
     bottomLights.forEach(l => l.classList.remove("on"));
 
     startTime = performance.now();
@@ -210,97 +278,188 @@ function startGame() {
     updateCounter();
   }, delay + randomDelay);
 
-  timeouts.push(final);
+  timeouts.push(finalTimer);
 }
 
-// 클릭
+function falseStart() {
+  clearAllTimers();
+  resetLights();
+
+  running = false;
+  waiting = false;
+  gameActive = false;
+
+  counterEl.textContent = "FALSE";
+  messageEl.textContent = "False Start! 다시 시작하세요";
+
+  startBtn.textContent = "RESTART";
+  startBtn.style.display = "inline-block";
+}
+
+function finishGame() {
+  running = false;
+  waiting = false;
+  gameActive = false;
+
+  messageEl.textContent = `반응속도: ${currentTime.toFixed(4)}초`;
+
+  resultButtons.classList.remove("hidden");
+}
+
 document.body.addEventListener("click", () => {
-
   if (waiting) {
-    clearAllTimers();
-    resetLights();
-
-    counterEl.textContent = "FALSE START";
-
-    running = false;
-    waiting = false;
-
-    startBtn.style.display = "block";
-    startBtn.textContent = "RESTART";
+    falseStart();
     return;
   }
 
   if (running) {
-    running = false;
-
-    resultButtons.classList.remove("hidden");
+    finishGame();
   }
 });
 
 startBtn.addEventListener("click", (e) => {
   e.stopPropagation();
+  startBtn.textContent = "START";
   startGame();
 });
 
-restartBtn.addEventListener("click", (e) => {
+retryBtn.addEventListener("click", (e) => {
   e.stopPropagation();
   startGame();
 });
 
 saveBtn.addEventListener("click", (e) => {
   e.stopPropagation();
+  resultButtons.classList.add("hidden");
   nameInputBox.classList.remove("hidden");
+  messageEl.textContent = "기록할 이름을 입력하세요";
+  nameInput.focus();
 });
 
-// 🔥 기록 저장 (핵심 로직)
-submitName.addEventListener("click", async () => {
+submitName.addEventListener("click", async (e) => {
+  e.stopPropagation();
+  await saveRecord();
+});
 
+nameInput.addEventListener("keydown", async (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    await saveRecord();
+  }
+});
+
+async function saveRecord() {
   const name = nameInput.value.trim();
-  if (!name) return;
 
-  const ref = doc(db, "leaderboard", name);
-  const snap = await getDoc(ref);
-
-  if (!snap.exists()) {
-    await setDoc(ref, { name, time: currentTime });
-  } else {
-    const prev = snap.data().time;
-
-    if (currentTime < prev) {
-      await setDoc(ref, { name, time: currentTime });
-    }
+  if (!name) {
+    alert("이름을 입력해주세요.");
+    return;
   }
 
-  showLeaderboard();
-});
+  try {
+    submitName.disabled = true;
+    submitName.textContent = "저장 중...";
+    messageEl.textContent = "기록 저장 중...";
 
-// 🔥 리더보드 TOP5
+    const playerRef = doc(db, "leaderboard", name);
+    const playerSnap = await getDoc(playerRef);
+
+    let saved = false;
+    let previousTime = null;
+
+    if (!playerSnap.exists()) {
+      await setDoc(playerRef, {
+        name,
+        time: currentTime,
+        updatedAt: serverTimestamp()
+      });
+      saved = true;
+    } else {
+      previousTime = Number(playerSnap.data().time);
+
+      if (currentTime < previousTime) {
+        await setDoc(playerRef, {
+          name,
+          time: currentTime,
+          updatedAt: serverTimestamp()
+        });
+        saved = true;
+      }
+    }
+
+    nameInputBox.classList.add("hidden");
+
+    if (saved) {
+      messageEl.textContent = `${name} 기록 저장 완료!`;
+    } else {
+      messageEl.textContent = `기존 기록 ${previousTime.toFixed(4)}초가 더 빠릅니다.`;
+    }
+
+    await showLeaderboard();
+
+  } catch (error) {
+    console.error(error);
+    alert("기록 저장 실패. Firestore Rules 또는 Firebase 설정을 확인해주세요.");
+    messageEl.textContent = "저장 실패";
+  } finally {
+    submitName.disabled = false;
+    submitName.textContent = "확인";
+  }
+}
+
 async function showLeaderboard() {
-
-  nameInputBox.classList.add("hidden");
   leaderboardEl.classList.remove("hidden");
 
   const q = query(
     collection(db, "leaderboard"),
-    orderBy("time"),
+    orderBy("time", "asc"),
     limit(5)
   );
 
   const snap = await getDocs(q);
 
-  let html = "<h3>🏆 TOP 5</h3>";
+  let html = `<h3>🏆 TOP 5 리더보드</h3>`;
 
-  let rank = 1;
+  if (snap.empty) {
+    html += `<div class="small">아직 기록이 없습니다.</div>`;
+  } else {
+    let rank = 1;
 
-  snap.forEach(doc => {
-    const d = doc.data();
-    html += `<div>${rank}. ${d.name} - ${d.time.toFixed(4)}초</div>`;
-    rank++;
-  });
+    snap.forEach(item => {
+      const data = item.data();
+
+      html += `
+        <div class="rank-row">
+          <span>${rank}. ${escapeHtml(data.name)}</span>
+          <strong>${Number(data.time).toFixed(4)}초</strong>
+        </div>
+      `;
+
+      rank++;
+    });
+  }
+
+  html += `
+    <button class="button" id="leaderboardRetryBtn">다시하기</button>
+  `;
 
   leaderboardEl.innerHTML = html;
+
+  document.getElementById("leaderboardRetryBtn").addEventListener("click", (e) => {
+    e.stopPropagation();
+    nameInput.value = "";
+    startGame();
+  });
 }
 
+function escapeHtml(text) {
+  return String(text)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
 </script>
 
 </body>
