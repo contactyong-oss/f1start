@@ -6,141 +6,68 @@
 <title>F1 Reaction Game</title>
 
 <style>
-* { box-sizing: border-box; }
-
 body {
-  margin: 0;
-  min-height: 100vh;
-  background: #111;
-  color: white;
-  font-family: Arial, sans-serif;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  user-select: none;
-  cursor: pointer;
+  margin:0;
+  background:#111;
+  color:white;
+  font-family:sans-serif;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  cursor:pointer;
 }
 
-.game {
-  width: 90%;
-  max-width: 460px;
-  text-align: center;
-}
-
-.title {
-  font-size: 24px;
-  font-weight: 900;
-  margin-bottom: 28px;
-}
+.game { width:90%; max-width:460px; text-align:center; }
 
 .lights {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  grid-template-rows: repeat(2, 1fr);
-  gap: 12px;
-  margin-bottom: 30px;
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  grid-template-rows:repeat(2,1fr);
+  gap:12px;
+  margin-bottom:30px;
 }
 
 .light {
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: #250000;
-  box-shadow: inset 0 0 12px rgba(0,0,0,0.9);
+  aspect-ratio:1;
+  border-radius:50%;
+  background:#250000;
 }
 
 .light.on {
-  background: red;
-  box-shadow: 0 0 20px red, 0 0 36px rgba(255,0,0,0.7);
+  background:red;
+  box-shadow:0 0 20px red;
 }
 
 .counter {
-  font-size: 48px;
-  font-weight: 900;
-  margin-bottom: 18px;
-  letter-spacing: 2px;
-}
-
-.message {
-  min-height: 26px;
-  color: #ccc;
-  margin-bottom: 18px;
-  font-size: 16px;
+  font-size:48px;
+  font-weight:900;
+  margin-bottom:20px;
 }
 
 .button {
-  padding: 12px 20px;
-  font-size: 16px;
-  font-weight: 800;
-  border: none;
-  border-radius: 999px;
-  cursor: pointer;
-  margin: 6px;
+  padding:12px 20px;
+  font-weight:700;
+  border:none;
+  border-radius:999px;
+  margin:5px;
+  cursor:pointer;
 }
 
-.button:active {
-  transform: scale(0.96);
-}
-
-.hidden {
-  display: none;
-}
-
-input {
-  padding: 12px;
-  font-size: 16px;
-  margin-top: 10px;
-  width: 78%;
-  border-radius: 12px;
-  border: none;
-  text-align: center;
-}
+.hidden { display:none; }
 
 .leaderboard {
-  margin-top: 24px;
-  text-align: center;
-  max-height: 360px;
-  overflow-y: auto;
-  padding-right: 6px;
-}
-
-.leaderboard::-webkit-scrollbar {
-  width: 6px;
-}
-
-.leaderboard::-webkit-scrollbar-thumb {
-  background: #555;
-  border-radius: 4px;
+  max-height:360px;
+  overflow-y:auto;
 }
 
 .rank-row {
-  display: grid;
-  grid-template-columns: 1fr auto auto;
-  gap: 12px;
-  align-items: center;
-  padding: 10px 14px;
-  margin: 8px 0;
-  background: #1d1d1d;
-  border-radius: 12px;
-  text-align: left;
-}
-
-.rank-row strong,
-.rank-row span:last-child {
-  text-align: right;
-}
-
-.board-head {
-  color: #aaa;
-  font-size: 13px;
-  background: transparent;
-  padding-top: 0;
-  padding-bottom: 0;
-}
-
-.small {
-  color: #aaa;
-  font-size: 14px;
-  margin-top: 10px;
+  display:grid;
+  grid-template-columns:1fr auto auto;
+  background:#1d1d1d;
+  padding:10px;
+  margin:6px 0;
+  border-radius:10px;
 }
 </style>
 </head>
@@ -148,27 +75,22 @@ input {
 <body>
 
 <div class="game">
-  <div class="title">F1 반응속도 테스트</div>
-
   <div class="lights" id="lights"></div>
 
   <div class="counter" id="counter">0.0000</div>
+  <div id="message">START를 누르세요</div>
 
-  <div class="message" id="message">START를 누르세요</div>
-
-  <button class="button" id="startBtn">START</button>
-  <button class="button" id="viewLeaderboardBtn">리더보드</button>
+  <button id="startBtn" class="button">START</button>
+  <button id="viewLeaderboardBtn" class="button">리더보드</button>
 
   <div id="resultButtons" class="hidden">
-    <button class="button" id="saveBtn">기록하기</button>
-    <button class="button" id="retryBtn">다시하기</button>
+    <button id="saveBtn" class="button">기록하기</button>
+    <button id="retryBtn" class="button">다시하기</button>
   </div>
 
   <div id="nameInputBox" class="hidden">
-    <div>이름을 입력하세요</div>
-    <input id="nameInput" placeholder="예: 홍길동" maxlength="20"/>
-    <br/>
-    <button class="button" id="submitName">확인</button>
+    <input id="nameInput" placeholder="이름 입력"/>
+    <button id="submitName" class="button">확인</button>
   </div>
 
   <div id="leaderboard" class="leaderboard hidden"></div>
@@ -176,33 +98,16 @@ input {
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-analytics.js";
-import {
-  getFirestore,
-  doc,
-  getDoc,
-  setDoc,
-  collection,
-  query,
-  orderBy,
-  limit,
-  getDocs,
-  serverTimestamp
-} from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, collection, query, orderBy, limit, getDocs } 
+from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCu0m7d1aLoaDiZ8aupYgHUSxVzb8rsKRc",
   authDomain: "f1start-cc6eb.firebaseapp.com",
   projectId: "f1start-cc6eb",
-  storageBucket: "f1start-cc6eb.firebasestorage.app",
-  messagingSenderId: "472809385228",
-  appId: "1:472809385228:web:c537586b1ee4ab437e6d29",
-  measurementId: "G-0XDT6010F4"
 };
 
 const app = initializeApp(firebaseConfig);
-getAnalytics(app);
-
 const db = getFirestore(app);
 
 const lightsEl = document.getElementById("lights");
@@ -213,362 +118,200 @@ const startBtn = document.getElementById("startBtn");
 const viewLeaderboardBtn = document.getElementById("viewLeaderboardBtn");
 const saveBtn = document.getElementById("saveBtn");
 const retryBtn = document.getElementById("retryBtn");
-const resultButtons = document.getElementById("resultButtons");
 
+const resultButtons = document.getElementById("resultButtons");
 const nameInputBox = document.getElementById("nameInputBox");
 const nameInput = document.getElementById("nameInput");
 const submitName = document.getElementById("submitName");
 
 const leaderboardEl = document.getElementById("leaderboard");
 
-const FALSE_START_STORAGE_KEY = "f1_false_start_count";
-const FALSE_START_EXPIRE_KEY = "f1_false_start_expire_at";
-const FALSE_START_EXPIRE_MS = 30 * 60 * 1000;
-
 const lights = [];
-let bottomLights = [];
+let bottomLights;
 
-let running = false;
-let waiting = false;
+let running=false;
+let waiting=false;
 
-let startTime = 0;
-let currentTime = 0;
+let startTime=0;
+let currentTime=0;
 
-let falseStartCount = loadFalseStartCount();
+const KEY="fs_count";
+const KEY_EXP="fs_expire";
+const EXPIRE=30*60*1000;
 
-let timeouts = [];
+let falseStartCount = loadFS();
+let expireAt = Number(localStorage.getItem(KEY_EXP)||0);
 
-for (let i = 0; i < 10; i++) {
-  const el = document.createElement("div");
-  el.className = "light";
+let timeouts=[];
+
+for(let i=0;i<10;i++){
+  const el=document.createElement("div");
+  el.className="light";
   lightsEl.appendChild(el);
   lights.push(el);
 }
 
-bottomLights = lights.slice(5, 10);
+bottomLights = lights.slice(5,10);
 
-function loadFalseStartCount() {
-  const expireAt = Number(localStorage.getItem(FALSE_START_EXPIRE_KEY));
-  const now = Date.now();
-
-  if (!expireAt || now > expireAt) {
-    localStorage.removeItem(FALSE_START_STORAGE_KEY);
-    localStorage.removeItem(FALSE_START_EXPIRE_KEY);
+function loadFS(){
+  const exp=Number(localStorage.getItem(KEY_EXP));
+  if(!exp || Date.now()>exp){
+    localStorage.clear();
     return 0;
   }
-
-  return Number(localStorage.getItem(FALSE_START_STORAGE_KEY) || 0);
+  return Number(localStorage.getItem(KEY)||0);
 }
 
-function saveFalseStartCount() {
-  const expireAt = Date.now() + FALSE_START_EXPIRE_MS;
-
-  localStorage.setItem(FALSE_START_STORAGE_KEY, String(falseStartCount));
-  localStorage.setItem(FALSE_START_EXPIRE_KEY, String(expireAt));
+function saveFS(){
+  expireAt = Date.now()+EXPIRE;
+  localStorage.setItem(KEY,falseStartCount);
+  localStorage.setItem(KEY_EXP,expireAt);
 }
 
-function clearAllTimers() {
-  timeouts.forEach(t => clearTimeout(t));
-  timeouts = [];
+function formatRemain(){
+  let r = Math.max(0, expireAt-Date.now())/1000;
+  const m = Math.floor(r/60);
+  const s = (r%60).toFixed(3).padStart(6,"0");
+  return `${String(m).padStart(2,"0")}:${s}`;
 }
 
-function resetLights() {
-  lights.forEach(l => l.classList.remove("on"));
+function clearTimers(){
+  timeouts.forEach(t=>clearTimeout(t));
+  timeouts=[];
 }
 
-function hideAllPanels() {
-  resultButtons.classList.add("hidden");
-  nameInputBox.classList.add("hidden");
-  leaderboardEl.classList.add("hidden");
+function resetLights(){
+  lights.forEach(l=>l.classList.remove("on"));
 }
 
-function showHomeButtons() {
-  startBtn.style.display = "inline-block";
-  viewLeaderboardBtn.style.display = "inline-block";
-}
-
-function hideHomeButtons() {
-  startBtn.style.display = "none";
-  viewLeaderboardBtn.style.display = "none";
-}
-
-function updateCounter() {
-  if (!running) return;
-
-  const diff = (performance.now() - startTime) / 1000;
-  currentTime = diff;
-  counterEl.textContent = diff.toFixed(4);
-
+function updateCounter(){
+  if(!running) return;
+  const d=(performance.now()-startTime)/1000;
+  currentTime=d;
+  counterEl.textContent=d.toFixed(4);
   requestAnimationFrame(updateCounter);
 }
 
-function startGame() {
-  clearAllTimers();
+function startGame(){
+  clearTimers();
   resetLights();
-  hideAllPanels();
 
-  counterEl.textContent = "0.0000";
-  messageEl.textContent = `불이 꺼지면 클릭하세요 / 예측 출발 ${falseStartCount}회`;
+  running=false;
+  waiting=true;
 
-  running = false;
-  waiting = true;
-  currentTime = 0;
+  startBtn.style.display="none";
+  viewLeaderboardBtn.style.display="none";
 
-  hideHomeButtons();
+  let delay=0;
 
-  let delay = 0;
-
-  bottomLights.forEach(light => {
-    const t = setTimeout(() => {
-      if (!waiting) return;
-      light.classList.add("on");
-    }, delay);
-
-    timeouts.push(t);
-    delay += 1000;
+  bottomLights.forEach(l=>{
+    timeouts.push(setTimeout(()=>l.classList.add("on"),delay));
+    delay+=1000;
   });
 
-  const randomDelay = Math.random() * 1000;
-
-  const finalTimer = setTimeout(() => {
-    if (!waiting) return;
-
-    bottomLights.forEach(l => l.classList.remove("on"));
-
-    startTime = performance.now();
-    running = true;
-    waiting = false;
-
+  timeouts.push(setTimeout(()=>{
+    bottomLights.forEach(l=>l.classList.remove("on"));
+    startTime=performance.now();
+    running=true;
+    waiting=false;
     updateCounter();
-  }, delay + randomDelay);
-
-  timeouts.push(finalTimer);
+  },delay+Math.random()*1000));
 }
 
-function falseStart() {
+function falseStart(){
   falseStartCount++;
-  saveFalseStartCount();
+  saveFS();
 
-  clearAllTimers();
+  clearTimers();
   resetLights();
 
-  running = false;
-  waiting = false;
+  running=false;
+  waiting=false;
 
-  counterEl.textContent = "FALSE START";
-  messageEl.textContent = `예측 출발 ${falseStartCount}회`;
+  counterEl.textContent="FALSE";
 
-  startBtn.textContent = "RESTART";
-  showHomeButtons();
+  // 🔥 여기만 표시
+  function loop(){
+    messageEl.textContent = 
+      `False Start ${falseStartCount}회 / 초기화까지 ${formatRemain()}`;
+    if(waiting || running) return;
+    requestAnimationFrame(loop);
+  }
+  loop();
+
+  startBtn.style.display="inline-block";
+  viewLeaderboardBtn.style.display="inline-block";
 }
 
-function finishGame() {
-  running = false;
-  waiting = false;
+function finishGame(){
+  running=false;
+  waiting=false;
 
-  messageEl.textContent = `반응속도: ${currentTime.toFixed(4)}초 / 예측 출발 ${falseStartCount}회`;
-
+  messageEl.textContent=`기록: ${currentTime.toFixed(4)}초`;
   resultButtons.classList.remove("hidden");
 }
 
-document.body.addEventListener("click", () => {
-  if (waiting) {
-    falseStart();
-    return;
-  }
-
-  if (running) {
-    finishGame();
-  }
+document.body.addEventListener("click",()=>{
+  if(waiting){ falseStart(); return; }
+  if(running){ finishGame(); }
 });
 
-startBtn.addEventListener("click", (e) => {
+startBtn.onclick=(e)=>{ e.stopPropagation(); startGame(); };
+
+retryBtn.onclick=(e)=>{ e.stopPropagation(); startGame(); };
+
+saveBtn.onclick=(e)=>{
   e.stopPropagation();
-  startBtn.textContent = "START";
-  startGame();
-});
-
-viewLeaderboardBtn.addEventListener("click", async (e) => {
-  e.stopPropagation();
-
-  clearAllTimers();
-  resetLights();
-  hideAllPanels();
-  hideHomeButtons();
-
-  counterEl.textContent = "0.0000";
-  messageEl.textContent = "리더보드";
-
-  await showLeaderboard();
-});
-
-retryBtn.addEventListener("click", (e) => {
-  e.stopPropagation();
-  startGame();
-});
-
-saveBtn.addEventListener("click", (e) => {
-  e.stopPropagation();
-  resultButtons.classList.add("hidden");
   nameInputBox.classList.remove("hidden");
-  messageEl.textContent = "기록할 이름을 입력하세요";
-  nameInput.focus();
-});
+};
 
-submitName.addEventListener("click", async (e) => {
-  e.stopPropagation();
-  await saveRecord();
-});
+submitName.onclick=async ()=>{
+  const name=nameInput.value.trim();
+  if(!name) return;
 
-nameInput.addEventListener("click", (e) => {
-  e.stopPropagation();
-});
+  const ref=doc(db,"leaderboard",name);
+  const snap=await getDoc(ref);
 
-nameInput.addEventListener("keydown", async (e) => {
-  if (e.key === "Enter") {
-    e.preventDefault();
-    await saveRecord();
-  }
-});
-
-async function saveRecord() {
-  const name = nameInput.value.trim();
-
-  if (!name) {
-    alert("이름을 입력해주세요.");
-    return;
-  }
-
-  try {
-    submitName.disabled = true;
-    submitName.textContent = "저장 중...";
-    messageEl.textContent = "기록 저장 중...";
-
-    const playerRef = doc(db, "leaderboard", name);
-    const playerSnap = await getDoc(playerRef);
-
-    let saved = false;
-    let previousTime = null;
-
-    if (!playerSnap.exists()) {
-      await setDoc(playerRef, {
-        name,
-        time: currentTime,
-        falseStarts: falseStartCount,
-        updatedAt: serverTimestamp()
-      });
-      saved = true;
-    } else {
-      previousTime = Number(playerSnap.data().time);
-
-      if (currentTime < previousTime) {
-        await setDoc(playerRef, {
-          name,
-          time: currentTime,
-          falseStarts: falseStartCount,
-          updatedAt: serverTimestamp()
-        });
-        saved = true;
-      }
-    }
-
-    nameInputBox.classList.add("hidden");
-
-    if (saved) {
-      messageEl.textContent = `${name} 기록 저장 완료!`;
-    } else {
-      messageEl.textContent = `기존 기록 ${previousTime.toFixed(4)}초가 더 빠릅니다.`;
-    }
-
-    await showLeaderboard();
-
-  } catch (error) {
-    console.error(error);
-    alert("기록 저장 실패. Firestore Rules 또는 Firebase 설정을 확인해주세요.");
-    messageEl.textContent = "저장 실패";
-  } finally {
-    submitName.disabled = false;
-    submitName.textContent = "확인";
-  }
-}
-
-async function showLeaderboard() {
-  leaderboardEl.classList.remove("hidden");
-
-  const q = query(
-    collection(db, "leaderboard"),
-    orderBy("time", "asc"),
-    limit(30)
-  );
-
-  const snap = await getDocs(q);
-
-  let html = `<h3>🏆 TOP 30 리더보드</h3>`;
-
-  if (snap.empty) {
-    html += `<div class="small">아직 기록이 없습니다.</div>`;
-  } else {
-    html += `
-      <div class="rank-row board-head">
-        <span>이름</span>
-        <span>기록</span>
-        <span>예측 출발</span>
-      </div>
-    `;
-
-    let rank = 1;
-
-    snap.forEach(item => {
-      const data = item.data();
-      const fs = Number(data.falseStarts || 0);
-
-      html += `
-        <div class="rank-row">
-          <span>${rank}. ${escapeHtml(data.name)}</span>
-          <strong>${Number(data.time).toFixed(4)}초</strong>
-          <span>${fs}회</span>
-        </div>
-      `;
-
-      rank++;
+  if(!snap.exists() || currentTime < snap.data().time){
+    await setDoc(ref,{
+      name,
+      time:currentTime,
+      falseStarts:falseStartCount
     });
   }
 
-  html += `
-    <button class="button" id="leaderboardRetryBtn">다시하기</button>
-    <button class="button" id="leaderboardHomeBtn">처음으로</button>
-  `;
+  showLeaderboard();
+};
 
-  leaderboardEl.innerHTML = html;
+async function showLeaderboard(){
+  leaderboardEl.classList.remove("hidden");
 
-  document.getElementById("leaderboardRetryBtn").addEventListener("click", (e) => {
-    e.stopPropagation();
-    nameInput.value = "";
-    startGame();
+  const q=query(collection(db,"leaderboard"),orderBy("time"),limit(30));
+  const snap=await getDocs(q);
+
+  let html="<h3>TOP 30</h3>";
+
+  let i=1;
+  snap.forEach(d=>{
+    const v=d.data();
+    html+=`
+    <div class="rank-row">
+      <span>${i}. ${v.name}</span>
+      <span>${v.time.toFixed(4)}</span>
+      <span>${v.falseStarts||0}</span>
+    </div>`;
+    i++;
   });
 
-  document.getElementById("leaderboardHomeBtn").addEventListener("click", (e) => {
-    e.stopPropagation();
-
-    hideAllPanels();
-    resetLights();
-
-    counterEl.textContent = "0.0000";
-    messageEl.textContent = "START를 누르세요";
-
-    startBtn.textContent = "START";
-    showHomeButtons();
-  });
+  html+=`<button onclick="location.reload()">다시하기</button>`;
+  leaderboardEl.innerHTML=html;
 }
 
-function escapeHtml(text) {
-  return String(text)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
+viewLeaderboardBtn.onclick=(e)=>{
+  e.stopPropagation();
+  showLeaderboard();
+};
+
 </script>
 
 </body>
