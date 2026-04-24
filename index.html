@@ -1,250 +1,188 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>F1 Reaction Time</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>F1 Reaction</title>
 
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+<style>
+body {
+  margin:0;
+  height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#111;
+  color:white;
+  font-family:sans-serif;
+  user-select:none;
+  cursor:pointer;
+}
 
-    body {
-      margin: 0;
-      width: 100vw;
-      height: 100vh;
-      background: #111;
-      color: white;
-      font-family: Arial, sans-serif;
+.game {
+  text-align:center;
+  width:90%;
+  max-width:420px;
+}
 
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+.lights {
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:12px;
+  margin-bottom:30px;
+}
 
-      user-select: none;
-      cursor: pointer;
-    }
+.light {
+  aspect-ratio:1;
+  border-radius:50%;
+  background:#250000;
+}
 
-    .game {
-      width: 100%;
-      max-width: 480px;
-      padding: 24px;
-      text-align: center;
-    }
+.light.on {
+  background:red;
+  box-shadow:0 0 20px red;
+}
 
-    .title {
-      font-size: 24px;
-      font-weight: 800;
-      margin-bottom: 28px;
-    }
+.counter {
+  font-size:48px;
+  font-weight:900;
+  margin-bottom:20px;
+}
 
-    .lights {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      grid-template-rows: repeat(2, 1fr);
-      gap: 14px;
-
-      width: 100%;
-      margin-bottom: 36px;
-    }
-
-    .light {
-      aspect-ratio: 1 / 1;
-      border-radius: 50%;
-      background: #260000;
-      box-shadow:
-        inset 0 0 12px rgba(0, 0, 0, 0.9),
-        0 0 4px rgba(0, 0, 0, 0.8);
-    }
-
-    .light.on {
-      background: #ff1111;
-      box-shadow:
-        0 0 18px #ff1111,
-        0 0 35px rgba(255, 0, 0, 0.8),
-        inset 0 0 8px rgba(255, 255, 255, 0.4);
-    }
-
-    .counter {
-      font-size: 52px;
-      font-weight: 900;
-      letter-spacing: 2px;
-      margin-bottom: 20px;
-    }
-
-    .message {
-      font-size: 18px;
-      color: #ccc;
-      min-height: 28px;
-      margin-bottom: 20px;
-    }
-
-    .button {
-      border: none;
-      background: white;
-      color: #111;
-      font-size: 18px;
-      font-weight: 800;
-      padding: 14px 24px;
-      border-radius: 999px;
-      cursor: pointer;
-    }
-
-    .button:active {
-      transform: scale(0.96);
-    }
-
-    @media (max-width: 480px) {
-      .game {
-        max-width: 360px;
-      }
-
-      .counter {
-        font-size: 42px;
-      }
-
-      .title {
-        font-size: 21px;
-      }
-
-      .message {
-        font-size: 16px;
-      }
-    }
-  </style>
+.button {
+  padding:12px 20px;
+  font-size:16px;
+  font-weight:700;
+  border:none;
+  border-radius:20px;
+  cursor:pointer;
+}
+</style>
 </head>
 
 <body>
-  <div class="game">
-    <div class="title">F1 반응속도 테스트</div>
 
-    <div class="lights" id="lights"></div>
+<div class="game">
+  <div class="lights" id="lights"></div>
+  <div class="counter" id="counter">0.0000</div>
+  <button class="button" id="startBtn">START</button>
+</div>
 
-    <div class="counter" id="counter">0.0000</div>
+<script>
+const lightsEl = document.getElementById("lights");
+const counterEl = document.getElementById("counter");
+const startBtn = document.getElementById("startBtn");
 
-    <div class="message" id="message">
-      시작 버튼을 누르세요
-    </div>
+const lights = [];
+let bottomLights;
 
-    <button class="button" id="startButton">
-      START
-    </button>
-  </div>
+let running = false;
+let waiting = false;
+let startTime = 0;
 
-  <script>
-    const lightsContainer = document.getElementById("lights");
-    const counter = document.getElementById("counter");
-    const message = document.getElementById("message");
-    const startButton = document.getElementById("startButton");
+let timeouts = []; // 🔥 모든 타이머 저장
 
-    const lights = [];
+// 라이트 생성
+for (let i = 0; i < 10; i++) {
+  const el = document.createElement("div");
+  el.className = "light";
+  lightsEl.appendChild(el);
+  lights.push(el);
+}
 
-    let startTime = null;
-    let running = false;
-    let waitingForLightsOut = false;
-    let gameStarted = false;
+bottomLights = lights.slice(5, 10);
 
-    for (let i = 0; i < 10; i++) {
-      const light = document.createElement("div");
-      light.className = "light";
-      lightsContainer.appendChild(light);
-      lights.push(light);
-    }
+// 타이머 전체 정리
+function clearAllTimers() {
+  timeouts.forEach(t => clearTimeout(t));
+  timeouts = [];
+}
 
-    const bottomLights = lights.slice(5, 10);
+// 라이트 초기화
+function resetLights() {
+  lights.forEach(l => l.classList.remove("on"));
+}
 
-    function resetLights() {
-      lights.forEach(light => {
-        light.classList.remove("on");
-      });
-    }
+// 카운터
+function updateCounter() {
+  if (!running) return;
 
-    function updateCounter() {
-      if (!running) return;
+  const diff = (performance.now() - startTime) / 1000;
+  counterEl.textContent = diff.toFixed(4);
 
-      const now = performance.now();
-      const elapsed = (now - startTime) / 1000;
+  requestAnimationFrame(updateCounter);
+}
 
-      counter.textContent = elapsed.toFixed(4);
+// 게임 시작
+function startGame() {
+  clearAllTimers();
+  resetLights();
 
-      requestAnimationFrame(updateCounter);
-    }
+  counterEl.textContent = "0.0000";
 
-    function startGame() {
-      resetLights();
+  running = false;
+  waiting = true;
 
-      counter.textContent = "0.0000";
-      message.textContent = "불이 꺼지면 클릭하세요";
+  startBtn.style.display = "none";
 
-      running = false;
-      waitingForLightsOut = true;
-      gameStarted = true;
+  let delay = 0;
 
-      startButton.style.display = "none";
+  bottomLights.forEach(light => {
+    const t = setTimeout(() => {
+      light.classList.add("on");
+    }, delay);
 
-      let delay = 0;
+    timeouts.push(t);
+    delay += 1000; // 🔥 간격 (여기 수정 가능)
+  });
 
-      bottomLights.forEach((light) => {
-        setTimeout(() => {
-          light.classList.add("on");
-        }, delay);
+  const randomDelay = Math.random() * 1000;
 
-        delay += 900;
-      });
+  const final = setTimeout(() => {
+    bottomLights.forEach(l => l.classList.remove("on"));
 
-      const randomDelay = Math.random() * 1000;
+    startTime = performance.now();
+    running = true;
+    waiting = false;
 
-      setTimeout(() => {
-        bottomLights.forEach(light => {
-          light.classList.remove("on");
-        });
+    updateCounter();
+  }, delay + randomDelay);
 
-        startTime = performance.now();
-        running = true;
-        waitingForLightsOut = false;
+  timeouts.push(final);
+}
 
-        updateCounter();
-      }, delay + randomDelay);
-    }
+// 클릭 처리
+document.body.addEventListener("click", () => {
 
-    function handleClick() {
-      if (!gameStarted) return;
+  // false start
+  if (waiting) {
+    clearAllTimers();     // 🔥 핵심
+    resetLights();
 
-      if (waitingForLightsOut) {
-        resetLights();
+    running = false;
+    waiting = false;
 
-        running = false;
-        waitingForLightsOut = false;
-        gameStarted = false;
+    counterEl.textContent = "FALSE START";
 
-        counter.textContent = "0.0000";
-        message.textContent = "너무 빨랐습니다! False Start";
+    startBtn.style.display = "inline-block";
+    startBtn.textContent = "RESTART";
+    return;
+  }
 
-        startButton.textContent = "RESTART";
-        startButton.style.display = "inline-block";
+  // 정상 클릭
+  if (running) {
+    running = false;
 
-        return;
-      }
+    startBtn.style.display = "inline-block";
+    startBtn.textContent = "RESTART";
+  }
+});
 
-      if (running) {
-        running = false;
-        gameStarted = false;
+startBtn.addEventListener("click", (e) => {
+  e.stopPropagation();
+  startGame();
+});
+</script>
 
-        message.textContent = "반응속도: " + counter.textContent + "초";
-
-        startButton.textContent = "RESTART";
-        startButton.style.display = "inline-block";
-      }
-    }
-
-    startButton.addEventListener("click", function(event) {
-      event.stopPropagation();
-      startGame();
-    });
-
-    document.body.addEventListener("click", handleClick);
-  </script>
 </body>
 </html>
