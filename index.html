@@ -23,7 +23,7 @@ body {
 
 .game {
   width: 90%;
-  max-width: 420px;
+  max-width: 460px;
   text-align: center;
 }
 
@@ -101,12 +101,28 @@ input {
 }
 
 .rank-row {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 12px;
+  align-items: center;
   padding: 10px 14px;
   margin: 8px 0;
   background: #1d1d1d;
   border-radius: 12px;
+  text-align: left;
+}
+
+.rank-row strong,
+.rank-row span:last-child {
+  text-align: right;
+}
+
+.board-head {
+  color: #aaa;
+  font-size: 13px;
+  background: transparent;
+  padding-top: 0;
+  padding-bottom: 0;
 }
 
 .small {
@@ -202,6 +218,8 @@ let waiting = false;
 let startTime = 0;
 let currentTime = 0;
 
+let falseStartCount = 0;
+
 let timeouts = [];
 
 for (let i = 0; i < 10; i++) {
@@ -254,7 +272,7 @@ function startGame() {
   hideAllPanels();
 
   counterEl.textContent = "0.0000";
-  messageEl.textContent = "불이 꺼지면 클릭하세요";
+  messageEl.textContent = `불이 꺼지면 클릭하세요 / 예측 출발 ${falseStartCount}회`;
 
   running = false;
   waiting = true;
@@ -292,6 +310,8 @@ function startGame() {
 }
 
 function falseStart() {
+  falseStartCount++;
+
   clearAllTimers();
   resetLights();
 
@@ -299,7 +319,7 @@ function falseStart() {
   waiting = false;
 
   counterEl.textContent = "FALSE";
-  messageEl.textContent = "False Start! 다시 시작하세요";
+  messageEl.textContent = `False Start! 예측 출발 ${falseStartCount}회`;
 
   startBtn.textContent = "RESTART";
   showHomeButtons();
@@ -309,7 +329,7 @@ function finishGame() {
   running = false;
   waiting = false;
 
-  messageEl.textContent = `반응속도: ${currentTime.toFixed(4)}초`;
+  messageEl.textContent = `반응속도: ${currentTime.toFixed(4)}초 / 예측 출발 ${falseStartCount}회`;
 
   resultButtons.classList.remove("hidden");
 }
@@ -397,6 +417,7 @@ async function saveRecord() {
       await setDoc(playerRef, {
         name,
         time: currentTime,
+        falseStarts: falseStartCount,
         updatedAt: serverTimestamp()
       });
       saved = true;
@@ -407,6 +428,7 @@ async function saveRecord() {
         await setDoc(playerRef, {
           name,
           time: currentTime,
+          falseStarts: falseStartCount,
           updatedAt: serverTimestamp()
         });
         saved = true;
@@ -449,15 +471,25 @@ async function showLeaderboard() {
   if (snap.empty) {
     html += `<div class="small">아직 기록이 없습니다.</div>`;
   } else {
+    html += `
+      <div class="rank-row board-head">
+        <span>이름</span>
+        <span>기록</span>
+        <span>예측 출발</span>
+      </div>
+    `;
+
     let rank = 1;
 
     snap.forEach(item => {
       const data = item.data();
+      const fs = Number(data.falseStarts || 0);
 
       html += `
         <div class="rank-row">
           <span>${rank}. ${escapeHtml(data.name)}</span>
           <strong>${Number(data.time).toFixed(4)}초</strong>
+          <span>${fs}회</span>
         </div>
       `;
 
