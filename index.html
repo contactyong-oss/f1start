@@ -129,6 +129,7 @@ input {
   <div class="message" id="message">START를 누르세요</div>
 
   <button class="button" id="startBtn">START</button>
+  <button class="button" id="viewLeaderboardBtn">리더보드</button>
 
   <div id="resultButtons" class="hidden">
     <button class="button" id="saveBtn">기록하기</button>
@@ -181,6 +182,7 @@ const counterEl = document.getElementById("counter");
 const messageEl = document.getElementById("message");
 
 const startBtn = document.getElementById("startBtn");
+const viewLeaderboardBtn = document.getElementById("viewLeaderboardBtn");
 const saveBtn = document.getElementById("saveBtn");
 const retryBtn = document.getElementById("retryBtn");
 const resultButtons = document.getElementById("resultButtons");
@@ -196,7 +198,6 @@ let bottomLights = [];
 
 let running = false;
 let waiting = false;
-let gameActive = false;
 
 let startTime = 0;
 let currentTime = 0;
@@ -227,6 +228,16 @@ function hideAllPanels() {
   leaderboardEl.classList.add("hidden");
 }
 
+function showHomeButtons() {
+  startBtn.style.display = "inline-block";
+  viewLeaderboardBtn.style.display = "inline-block";
+}
+
+function hideHomeButtons() {
+  startBtn.style.display = "none";
+  viewLeaderboardBtn.style.display = "none";
+}
+
 function updateCounter() {
   if (!running) return;
 
@@ -247,10 +258,9 @@ function startGame() {
 
   running = false;
   waiting = true;
-  gameActive = true;
   currentTime = 0;
 
-  startBtn.style.display = "none";
+  hideHomeButtons();
 
   let delay = 0;
 
@@ -287,19 +297,17 @@ function falseStart() {
 
   running = false;
   waiting = false;
-  gameActive = false;
 
   counterEl.textContent = "FALSE";
   messageEl.textContent = "False Start! 다시 시작하세요";
 
   startBtn.textContent = "RESTART";
-  startBtn.style.display = "inline-block";
+  showHomeButtons();
 }
 
 function finishGame() {
   running = false;
   waiting = false;
-  gameActive = false;
 
   messageEl.textContent = `반응속도: ${currentTime.toFixed(4)}초`;
 
@@ -323,6 +331,20 @@ startBtn.addEventListener("click", (e) => {
   startGame();
 });
 
+viewLeaderboardBtn.addEventListener("click", async (e) => {
+  e.stopPropagation();
+
+  clearAllTimers();
+  resetLights();
+  hideAllPanels();
+  hideHomeButtons();
+
+  counterEl.textContent = "0.0000";
+  messageEl.textContent = "리더보드";
+
+  await showLeaderboard();
+});
+
 retryBtn.addEventListener("click", (e) => {
   e.stopPropagation();
   startGame();
@@ -339,6 +361,10 @@ saveBtn.addEventListener("click", (e) => {
 submitName.addEventListener("click", async (e) => {
   e.stopPropagation();
   await saveRecord();
+});
+
+nameInput.addEventListener("click", (e) => {
+  e.stopPropagation();
 });
 
 nameInput.addEventListener("keydown", async (e) => {
@@ -441,6 +467,7 @@ async function showLeaderboard() {
 
   html += `
     <button class="button" id="leaderboardRetryBtn">다시하기</button>
+    <button class="button" id="leaderboardHomeBtn">처음으로</button>
   `;
 
   leaderboardEl.innerHTML = html;
@@ -449,6 +476,19 @@ async function showLeaderboard() {
     e.stopPropagation();
     nameInput.value = "";
     startGame();
+  });
+
+  document.getElementById("leaderboardHomeBtn").addEventListener("click", (e) => {
+    e.stopPropagation();
+
+    hideAllPanels();
+    resetLights();
+
+    counterEl.textContent = "0.0000";
+    messageEl.textContent = "START를 누르세요";
+
+    startBtn.textContent = "START";
+    showHomeButtons();
   });
 }
 
