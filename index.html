@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>미국 출장 가능성 지표</title>
 
@@ -26,7 +26,7 @@
 
     .container {
       width: min(760px, calc(100% - 32px));
-      margin: 0 auto;
+      margin: auto;
       padding: 60px 0 80px;
     }
 
@@ -34,18 +34,18 @@
       margin-bottom: 28px;
     }
 
-    .header .eyebrow {
+    .eyebrow {
       font-size: 12px;
       font-weight: 700;
-      letter-spacing: 0.12em;
+      letter-spacing: .12em;
       color: #777;
       margin-bottom: 8px;
     }
 
-    .header h1 {
+    h1 {
       margin: 0;
       font-size: 30px;
-      letter-spacing: -0.04em;
+      letter-spacing: -.04em;
     }
 
     /* SCORE */
@@ -55,7 +55,7 @@
       border: 1px solid #e2e4e7;
       border-radius: 20px;
       padding: 40px;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.04);
+      box-shadow: 0 8px 30px rgba(0,0,0,.04);
     }
 
     .score-label {
@@ -73,7 +73,7 @@
     .score-number {
       font-size: 82px;
       font-weight: 800;
-      letter-spacing: -0.07em;
+      letter-spacing: -.07em;
       line-height: 1;
     }
 
@@ -95,7 +95,6 @@
       width: 0%;
       background: #17191c;
       border-radius: 20px;
-      transition: width 0.3s ease;
     }
 
     .score-status {
@@ -115,7 +114,7 @@
       font-size: 13px;
     }
 
-    /* SECTION */
+    /* INCIDENTS */
 
     .section {
       margin-top: 32px;
@@ -126,8 +125,6 @@
       font-weight: 700;
       margin-bottom: 12px;
     }
-
-    /* INCIDENT */
 
     .incident-list {
       display: flex;
@@ -144,7 +141,7 @@
       justify-content: space-between;
       align-items: center;
       gap: 20px;
-      animation: incidentIn 0.3s ease-out;
+      animation: incidentIn .3s ease-out;
     }
 
     @keyframes incidentIn {
@@ -152,7 +149,6 @@
         opacity: 0;
         transform: translateY(-5px);
       }
-
       to {
         opacity: 1;
         transform: translateY(0);
@@ -181,12 +177,6 @@
       font-weight: 800;
     }
 
-    .positive {
-      color: #111;
-    }
-
-    /* EMPTY */
-
     .empty-state {
       background: #fff;
       border: 1px solid #e2e4e7;
@@ -210,7 +200,7 @@
       font-size: 14px;
       font-weight: 700;
       color: #555;
-      transition: 0.2s;
+      transition: .2s;
     }
 
     .add-button:hover {
@@ -239,7 +229,7 @@
     .modal-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.45);
+      background: rgba(0,0,0,.45);
       backdrop-filter: blur(4px);
       display: none;
       align-items: center;
@@ -257,8 +247,8 @@
       background: #fff;
       border-radius: 20px;
       padding: 32px;
-      box-shadow: 0 25px 80px rgba(0,0,0,0.2);
-      animation: modalIn 0.2s ease-out;
+      box-shadow: 0 25px 80px rgba(0,0,0,.2);
+      animation: modalIn .2s ease-out;
     }
 
     @keyframes modalIn {
@@ -266,7 +256,6 @@
         opacity: 0;
         transform: translateY(10px) scale(.98);
       }
-
       to {
         opacity: 1;
         transform: translateY(0) scale(1);
@@ -373,6 +362,15 @@
       color: #bbb;
     }
 
+    /* LOADING */
+
+    .loading {
+      color: #999;
+      font-size: 13px;
+      text-align: center;
+      padding: 25px;
+    }
+
     @media (max-width: 600px) {
 
       .container {
@@ -401,6 +399,7 @@
 <main class="container">
 
   <header class="header">
+
     <div class="eyebrow">
       CONFIDENTIAL / INTERNAL ANALYSIS
     </div>
@@ -408,6 +407,7 @@
     <h1>
       🇺🇸 미국 출장 가능성 지표
     </h1>
+
   </header>
 
 
@@ -474,16 +474,18 @@
       최근 감지된 정황
     </div>
 
-
     <div
       class="incident-list"
       id="incidentList"
-    ></div>
-
+    >
+      <div class="loading">
+        데이터 불러오는 중...
+      </div>
+    </div>
 
     <button
       class="add-button"
-      onclick="openAuth()"
+      id="addButton"
     >
       ＋ 새로운 정황 추가
     </button>
@@ -519,7 +521,7 @@
 
     <button
       class="reset-button"
-      onclick="openResetAuth()"
+      id="resetButton"
     >
       데이터 초기화
     </button>
@@ -559,8 +561,7 @@
       type="password"
       id="passwordInput"
       autocomplete="off"
-      onkeydown="if(event.key === 'Enter') authenticate()"
-    />
+    >
 
     <div
       class="auth-error"
@@ -569,14 +570,14 @@
 
     <button
       class="auth-button"
-      onclick="authenticate()"
+      id="authButton"
     >
       인증
     </button>
 
     <button
       class="close-button"
-      onclick="closeAuth()"
+      id="authCloseButton"
     >
       취소
     </button>
@@ -595,65 +596,62 @@
 
   <div class="modal">
 
-    <div class="form-title">
+    <div style="
+      font-size:20px;
+      font-weight:800;
+      margin-bottom:22px;
+    ">
       NEW INCIDENT
     </div>
 
 
-    <div class="form-group">
+    <label class="field-label">
+      정황 내용
+    </label>
 
-      <label class="field-label">
-        정황 내용
-      </label>
+    <input
+      type="text"
+      id="incidentText"
+      placeholder="예: 미국 항공권 검색 정황 포착"
+    >
+
+
+    <label
+      class="field-label"
+      style="margin-top:18px;"
+    >
+      출장 가능성 영향
+    </label>
+
+    <div style="
+      display:flex;
+      align-items:center;
+      gap:8px;
+    ">
+
+      <span style="font-weight:800;">
+        +
+      </span>
 
       <input
-        type="text"
-        id="incidentText"
-        placeholder="예: 미국 항공권 검색 정황 포착"
-      />
-
-    </div>
-
-
-    <div class="form-group">
-
-      <label class="field-label">
-        출장 가능성 영향
-      </label>
-
-      <div
-        style="
-          display:flex;
-          align-items:center;
-          gap:8px;
-        "
+        type="number"
+        id="incidentImpact"
+        value="5"
+        min="0.1"
+        max="100"
+        step="0.1"
       >
 
-        <span style="font-weight:800;">
-          +
-        </span>
-
-        <input
-          type="number"
-          id="incidentImpact"
-          value="5"
-          min="0.1"
-          max="100"
-          step="0.1"
-        />
-
-        <span>
-          %
-        </span>
-
-      </div>
+      <span>
+        %
+      </span>
 
     </div>
 
 
     <button
       class="register-button"
-      onclick="registerIncident()"
+      id="registerButton"
     >
       REGISTER
     </button>
@@ -661,7 +659,7 @@
 
     <button
       class="close-button"
-      onclick="closeIncident()"
+      id="incidentCloseButton"
     >
       취소
     </button>
@@ -671,609 +669,813 @@
 </div>
 
 
-<script>
+<script type="module">
+
+  /* ========================================
+     FIREBASE
+  ======================================== */
+
+  import {
+    initializeApp
+  } from
+  "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
 
 
-/* ========================================
-   설정
-======================================== */
-
-const PASSWORD = "alrnrcnfwkd";
-
-const STORAGE_KEY = "usBusinessTripProbability";
-
-
-/* ========================================
-   기본 상태
-======================================== */
-
-let data = loadData();
+  import {
+    getFirestore,
+    collection,
+    addDoc,
+    query,
+    orderBy,
+    onSnapshot,
+    serverTimestamp
+  } from
+  "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 
 
-/* ========================================
-   LocalStorage 불러오기
-======================================== */
+  const firebaseConfig = {
 
-function loadData() {
+    apiKey:
+      "AIzaSyD7_7fubG9jj2lYE803_bQbgLO5Yl_0ENV8",
 
-  const saved =
-    localStorage.getItem(STORAGE_KEY);
+    authDomain:
+      "sttaaarrttt.firebaseapp.com",
 
-  if (saved) {
+    projectId:
+      "sttaaarrttt",
 
-    try {
+    storageBucket:
+      "sttaaarrttt.firebasestorage.app",
 
-      return JSON.parse(saved);
+    messagingSenderId:
+      "177267691380",
 
-    } catch (error) {
+    appId:
+      "1:177267691380:web:2c182032c0e6e9220e6621",
 
-      console.error(
-        "저장된 데이터를 읽을 수 없습니다.",
-        error
-      );
-
-    }
-
-  }
-
-
-  // 최초 접속
-
-  return {
-
-    score: 0,
-
-    incidents: []
+    measurementId:
+      "G-XDW12S3LVY"
 
   };
 
-}
+
+  const app =
+    initializeApp(firebaseConfig);
 
 
-/* ========================================
-   LocalStorage 저장
-======================================== */
-
-function saveData() {
-
-  localStorage.setItem(
-    STORAGE_KEY,
-    JSON.stringify(data)
-  );
-
-}
+  const db =
+    getFirestore(app);
 
 
-/* ========================================
-   상태 문구
-======================================== */
+  /* ========================================
+     설정
+  ======================================== */
 
-function getStatus(score) {
-
-  if (score >= 100) {
-    return "출장 확정";
-  }
-
-  if (score >= 85) {
-    return "매우 높은 가능성";
-  }
-
-  if (score >= 70) {
-    return "상당히 유력";
-  }
-
-  if (score >= 50) {
-    return "가능성이 높아지고 있음";
-  }
-
-  if (score >= 30) {
-    return "수상한 정황 감지";
-  }
-
-  if (score > 0) {
-    return "미세한 정황이 감지됨";
-  }
-
-  return "아직 가능성은 낮음";
-
-}
+  const PASSWORD = "미국출장";
 
 
-/* ========================================
-   화면 업데이트
-======================================== */
+  /* ========================================
+     DOM
+  ======================================== */
 
-function updateScore() {
+  const scoreNumber =
+    document.getElementById("scoreNumber");
 
-  const score =
-    Math.min(100, data.score);
+  const scoreFill =
+    document.getElementById("scoreFill");
 
+  const scoreStatus =
+    document.getElementById("scoreStatus");
 
-  document
-    .getElementById("scoreNumber")
-    .textContent =
-    score.toFixed(1);
+  const scoreChange =
+    document.getElementById("scoreChange");
 
-
-  document
-    .getElementById("scoreFill")
-    .style.width =
-    `${score}%`;
-
-
-  document
-    .getElementById("scoreStatus")
-    .textContent =
-    getStatus(score);
-
-
-  document
-    .getElementById("scoreChange")
-    .textContent =
-    `현재까지 +${score.toFixed(1)}%`;
-
-
-  if (score >= 100) {
-
-    document
-      .getElementById("confirmed")
-      .classList.add("show");
-
-  } else {
-
-    document
-      .getElementById("confirmed")
-      .classList.remove("show");
-
-  }
-
-}
-
-
-/* ========================================
-   사건 목록 출력
-======================================== */
-
-function renderIncidents() {
-
-  const list =
+  const incidentList =
     document.getElementById("incidentList");
 
-
-  list.innerHTML = "";
-
-
-  if (data.incidents.length === 0) {
-
-    list.innerHTML = `
-
-      <div class="empty-state">
-
-        아직 감지된 정황이 없습니다.
-
-      </div>
-
-    `;
-
-    return;
-
-  }
+  const confirmed =
+    document.getElementById("confirmed");
 
 
-  data.incidents.forEach(
-    (incident) => {
+  /* ========================================
+     상태
+  ======================================== */
 
-      const item =
-        document.createElement("div");
+  let currentScore = 0;
 
-
-      item.className =
-        "incident";
+  let incidents = [];
 
 
-      item.innerHTML = `
+  /* ========================================
+     상태 문구
+  ======================================== */
 
-        <div class="incident-left">
+  function getStatus(score) {
 
-          <div class="incident-time">
-            ${escapeHtml(incident.time)}
-          </div>
+    if (score >= 100)
+      return "출장 확정";
 
-          <div class="incident-text">
-            ${escapeHtml(incident.text)}
-          </div>
+    if (score >= 85)
+      return "매우 높은 가능성";
 
-        </div>
+    if (score >= 70)
+      return "상당히 유력";
 
-        <div class="incident-score positive">
-          +${Number(incident.impact).toFixed(1)}%
-        </div>
+    if (score >= 50)
+      return "가능성이 높아지고 있음";
 
-      `;
+    if (score >= 30)
+      return "수상한 정황 감지";
 
+    if (score > 0)
+      return "미세한 정황이 감지됨";
 
-      list.appendChild(item);
-
-    }
-  );
-
-}
-
-
-/* ========================================
-   HTML escape
-======================================== */
-
-function escapeHtml(text) {
-
-  const div =
-    document.createElement("div");
-
-  div.textContent =
-    text;
-
-  return div.innerHTML;
-
-}
-
-
-/* ========================================
-   인증창
-======================================== */
-
-function openAuth() {
-
-  document
-    .getElementById("authModal")
-    .classList.add("show");
-
-
-  document
-    .getElementById("passwordInput")
-    .focus();
-
-}
-
-
-function closeAuth() {
-
-  document
-    .getElementById("authModal")
-    .classList.remove("show");
-
-
-  document
-    .getElementById("passwordInput")
-    .value = "";
-
-
-  document
-    .getElementById("authError")
-    .textContent = "";
-
-}
-
-
-/* ========================================
-   인증
-======================================== */
-
-function authenticate() {
-
-  const password =
-    document
-      .getElementById("passwordInput")
-      .value;
-
-
-  if (password === PASSWORD) {
-
-    closeAuth();
-
-
-    document
-      .getElementById("incidentModal")
-      .classList.add("show");
-
-
-    document
-      .getElementById("incidentText")
-      .focus();
-
-
-  } else {
-
-    document
-      .getElementById("authError")
-      .textContent =
-      "ACCESS DENIED";
+    return "아직 가능성은 낮음";
 
   }
 
-}
 
+  /* ========================================
+     점수 화면
+  ======================================== */
 
-/* ========================================
-   사건 입력창
-======================================== */
+  function updateScore(
+    animateFrom = null
+  ) {
 
-function closeIncident() {
+    const target =
+      Math.min(100, currentScore);
 
-  document
-    .getElementById("incidentModal")
-    .classList.remove("show");
 
+    if (
+      animateFrom !== null &&
+      animateFrom !== target
+    ) {
 
-  document
-    .getElementById("incidentText")
-    .value = "";
-
-}
-
-
-/* ========================================
-   사건 등록
-======================================== */
-
-function registerIncident() {
-
-  const text =
-    document
-      .getElementById("incidentText")
-      .value
-      .trim();
-
-
-  const impact =
-    Number(
-      document
-        .getElementById("incidentImpact")
-        .value
-    );
-
-
-  if (!text) {
-
-    alert(
-      "정황 내용을 입력해주세요."
-    );
-
-    return;
-
-  }
-
-
-  if (!impact || impact <= 0) {
-
-    alert(
-      "가능성 상승폭을 입력해주세요."
-    );
-
-    return;
-
-  }
-
-
-  const previousScore =
-    data.score;
-
-
-  const newScore =
-    Math.min(
-      100,
-      data.score + impact
-    );
-
-
-  const now =
-    new Date();
-
-
-  const month =
-    String(
-      now.getMonth() + 1
-    ).padStart(2, "0");
-
-
-  const day =
-    String(
-      now.getDate()
-    ).padStart(2, "0");
-
-
-  const hour =
-    String(
-      now.getHours()
-    ).padStart(2, "0");
-
-
-  const minute =
-    String(
-      now.getMinutes()
-    ).padStart(2, "0");
-
-
-  const incident = {
-
-    text: text,
-
-    impact: impact,
-
-    time:
-      `${month}.${day} ${hour}:${minute}`
-
-  };
-
-
-  data.incidents.unshift(
-    incident
-  );
-
-
-  data.score =
-    newScore;
-
-
-  saveData();
-
-
-  closeIncident();
-
-
-  renderIncidents();
-
-
-  animateScore(
-    previousScore,
-    newScore
-  );
-
-}
-
-
-/* ========================================
-   점수 애니메이션
-======================================== */
-
-function animateScore(
-  from,
-  to
-) {
-
-  const duration = 1000;
-
-  const start =
-    performance.now();
-
-
-  function animate(now) {
-
-    const progress =
-      Math.min(
-        (now - start) / duration,
-        1
-      );
-
-
-    const eased =
-      1 -
-      Math.pow(
-        1 - progress,
-        3
-      );
-
-
-    const value =
-      from +
-      (to - from) *
-      eased;
-
-
-    document
-      .getElementById("scoreNumber")
-      .textContent =
-      value.toFixed(1);
-
-
-    document
-      .getElementById("scoreFill")
-      .style.width =
-      `${value}%`;
-
-
-    if (progress < 1) {
-
-      requestAnimationFrame(
-        animate
+      animateScore(
+        animateFrom,
+        target
       );
 
     } else {
 
-      updateScore();
+      scoreNumber.textContent =
+        target.toFixed(1);
+
+      scoreFill.style.width =
+        `${target}%`;
+
+    }
+
+
+    scoreStatus.textContent =
+      getStatus(target);
+
+
+    scoreChange.textContent =
+      `현재까지 +${target.toFixed(1)}%`;
+
+
+    if (target >= 100) {
+
+      confirmed.classList.add(
+        "show"
+      );
+
+    } else {
+
+      confirmed.classList.remove(
+        "show"
+      );
 
     }
 
   }
 
 
-  requestAnimationFrame(
-    animate
+  /* ========================================
+     숫자 애니메이션
+  ======================================== */
+
+  function animateScore(
+    from,
+    to
+  ) {
+
+    const duration = 900;
+
+    const start =
+      performance.now();
+
+
+    function frame(now) {
+
+      const progress =
+        Math.min(
+          (now - start) / duration,
+          1
+        );
+
+
+      const eased =
+        1 -
+        Math.pow(
+          1 - progress,
+          3
+        );
+
+
+      const value =
+        from +
+        (to - from) *
+        eased;
+
+
+      scoreNumber.textContent =
+        value.toFixed(1);
+
+
+      scoreFill.style.width =
+        `${value}%`;
+
+
+      if (progress < 1) {
+
+        requestAnimationFrame(
+          frame
+        );
+
+      }
+
+    }
+
+
+    requestAnimationFrame(frame);
+
+  }
+
+
+  /* ========================================
+     HTML escape
+  ======================================== */
+
+  function escapeHtml(text) {
+
+    const div =
+      document.createElement("div");
+
+    div.textContent = text;
+
+    return div.innerHTML;
+
+  }
+
+
+  /* ========================================
+     날짜
+  ======================================== */
+
+  function formatDate(timestamp) {
+
+    if (!timestamp) {
+      return "방금 전";
+    }
+
+
+    const date =
+      timestamp.toDate();
+
+
+    const month =
+      String(
+        date.getMonth() + 1
+      ).padStart(2, "0");
+
+
+    const day =
+      String(
+        date.getDate()
+      ).padStart(2, "0");
+
+
+    const hour =
+      String(
+        date.getHours()
+      ).padStart(2, "0");
+
+
+    const minute =
+      String(
+        date.getMinutes()
+      ).padStart(2, "0");
+
+
+    return `${month}.${day} ${hour}:${minute}`;
+
+  }
+
+
+  /* ========================================
+     사건 목록
+  ======================================== */
+
+  function renderIncidents() {
+
+    incidentList.innerHTML = "";
+
+
+    if (incidents.length === 0) {
+
+      incidentList.innerHTML = `
+
+        <div class="empty-state">
+          아직 감지된 정황이 없습니다.
+        </div>
+
+      `;
+
+      return;
+
+    }
+
+
+    incidents.forEach(
+      incident => {
+
+        const item =
+          document.createElement("div");
+
+
+        item.className =
+          "incident";
+
+
+        item.innerHTML = `
+
+          <div class="incident-left">
+
+            <div class="incident-time">
+              ${formatDate(
+                incident.createdAt
+              )}
+            </div>
+
+            <div class="incident-text">
+              ${escapeHtml(
+                incident.text
+              )}
+            </div>
+
+          </div>
+
+          <div class="incident-score">
+            +${Number(
+              incident.impact
+            ).toFixed(1)}%
+          </div>
+
+        `;
+
+
+        incidentList.appendChild(
+          item
+        );
+
+      }
+    );
+
+  }
+
+
+  /* ========================================
+     FIRESTORE 실시간 감시
+  ======================================== */
+
+  const incidentsQuery =
+    query(
+      collection(
+        db,
+        "incidents"
+      ),
+      orderBy(
+        "createdAt",
+        "desc"
+      )
+    );
+
+
+  let firstLoad = true;
+
+
+  onSnapshot(
+    incidentsQuery,
+    snapshot => {
+
+      const oldScore =
+        currentScore;
+
+
+      incidents =
+        snapshot.docs.map(
+          doc => ({
+
+            id: doc.id,
+
+            ...doc.data()
+
+          })
+        );
+
+
+      currentScore =
+        incidents.reduce(
+          (
+            total,
+            incident
+          ) =>
+            total +
+            Number(
+              incident.impact || 0
+            ),
+          0
+        );
+
+
+      currentScore =
+        Math.min(
+          100,
+          currentScore
+        );
+
+
+      renderIncidents();
+
+
+      if (firstLoad) {
+
+        updateScore();
+
+        firstLoad = false;
+
+      } else {
+
+        updateScore(
+          oldScore
+        );
+
+      }
+
+    },
+
+    error => {
+
+      console.error(
+        "Firestore error:",
+        error
+      );
+
+
+      incidentList.innerHTML = `
+
+        <div class="empty-state">
+          데이터를 불러오지 못했습니다.
+        </div>
+
+      `;
+
+    }
+
   );
 
-}
 
+  /* ========================================
+     인증 모달
+  ======================================== */
 
-/* ========================================
-   초기화 인증
-======================================== */
-
-function openResetAuth() {
-
-  const password =
-    prompt(
-      "데이터를 초기화하려면 비밀번호를 입력하세요."
+  const authModal =
+    document.getElementById(
+      "authModal"
     );
 
 
-  if (password === null) {
-    return;
-  }
-
-
-  if (password !== PASSWORD) {
-
-    alert(
-      "ACCESS DENIED"
-    );
-
-    return;
-
-  }
-
-
-  const confirmed =
-    confirm(
-      "모든 정황과 출장 가능성 데이터를 삭제하고 0%로 초기화하시겠습니까?"
+  const incidentModal =
+    document.getElementById(
+      "incidentModal"
     );
 
 
-  if (!confirmed) {
-    return;
+  const passwordInput =
+    document.getElementById(
+      "passwordInput"
+    );
+
+
+  const authError =
+    document.getElementById(
+      "authError"
+    );
+
+
+  document
+    .getElementById("addButton")
+    .addEventListener(
+      "click",
+      () => {
+
+        authModal.classList.add(
+          "show"
+        );
+
+        passwordInput.focus();
+
+      }
+    );
+
+
+  function closeAuth() {
+
+    authModal.classList.remove(
+      "show"
+    );
+
+    passwordInput.value = "";
+
+    authError.textContent = "";
+
   }
 
 
-  localStorage.removeItem(
-    STORAGE_KEY
-  );
+  document
+    .getElementById(
+      "authCloseButton"
+    )
+    .addEventListener(
+      "click",
+      closeAuth
+    );
 
 
-  data = {
+  /* ========================================
+     비밀번호
+  ======================================== */
 
-    score: 0,
+  function authenticate() {
 
-    incidents: []
+    if (
+      passwordInput.value ===
+      PASSWORD
+    ) {
 
-  };
-
-
-  updateScore();
-
-  renderIncidents();
-
-}
+      closeAuth();
 
 
-/* ========================================
-   모달 외부 클릭
-======================================== */
+      incidentModal.classList.add(
+        "show"
+      );
 
-document
-  .getElementById("authModal")
-  .addEventListener(
+
+      document
+        .getElementById(
+          "incidentText"
+        )
+        .focus();
+
+
+    } else {
+
+      authError.textContent =
+        "ACCESS DENIED";
+
+    }
+
+  }
+
+
+  document
+    .getElementById("authButton")
+    .addEventListener(
+      "click",
+      authenticate
+    );
+
+
+  passwordInput
+    .addEventListener(
+      "keydown",
+      event => {
+
+        if (
+          event.key === "Enter"
+        ) {
+
+          authenticate();
+
+        }
+
+      }
+    );
+
+
+  /* ========================================
+     사건 등록창 닫기
+  ======================================== */
+
+  function closeIncident() {
+
+    incidentModal.classList.remove(
+      "show"
+    );
+
+    document
+      .getElementById(
+        "incidentText"
+      )
+      .value = "";
+
+  }
+
+
+  document
+    .getElementById(
+      "incidentCloseButton"
+    )
+    .addEventListener(
+      "click",
+      closeIncident
+    );
+
+
+  /* ========================================
+     사건 등록
+  ======================================== */
+
+  document
+    .getElementById(
+      "registerButton"
+    )
+    .addEventListener(
+      "click",
+      async () => {
+
+        const text =
+          document
+            .getElementById(
+              "incidentText"
+            )
+            .value
+            .trim();
+
+
+        const impact =
+          Number(
+            document
+              .getElementById(
+                "incidentImpact"
+              )
+              .value
+          );
+
+
+        if (!text) {
+
+          alert(
+            "정황 내용을 입력해주세요."
+          );
+
+          return;
+
+        }
+
+
+        if (
+          !impact ||
+          impact <= 0
+        ) {
+
+          alert(
+            "가능성 상승폭을 입력해주세요."
+          );
+
+          return;
+
+        }
+
+
+        const button =
+          document.getElementById(
+            "registerButton"
+          );
+
+
+        button.disabled = true;
+
+        button.textContent =
+          "REGISTERING...";
+
+
+        try {
+
+          await addDoc(
+            collection(
+              db,
+              "incidents"
+            ),
+            {
+
+              text: text,
+
+              impact: impact,
+
+              createdAt:
+                serverTimestamp()
+
+            }
+          );
+
+
+          closeIncident();
+
+
+        } catch (error) {
+
+          console.error(
+            error
+          );
+
+
+          alert(
+            "정황 등록에 실패했습니다."
+          );
+
+        }
+
+
+        button.disabled = false;
+
+        button.textContent =
+          "REGISTER";
+
+      }
+    );
+
+
+  /* ========================================
+     초기화
+  ======================================== */
+
+  document
+    .getElementById(
+      "resetButton"
+    )
+    .addEventListener(
+      "click",
+      () => {
+
+        const password =
+          prompt(
+            "데이터를 초기화하려면 비밀번호를 입력하세요."
+          );
+
+
+        if (
+          password !== PASSWORD
+        ) {
+
+          if (
+            password !== null
+          ) {
+
+            alert(
+              "ACCESS DENIED"
+            );
+
+          }
+
+          return;
+
+        }
+
+
+        alert(
+          "초기화 기능은 현재 Firebase 보안상 비활성화되어 있습니다."
+        );
+
+      }
+    );
+
+
+  /* ========================================
+     모달 바깥 클릭
+  ======================================== */
+
+  authModal.addEventListener(
     "click",
-    function(e) {
+    event => {
 
-      if (e.target === this) {
+      if (
+        event.target ===
+        authModal
+      ) {
 
         closeAuth();
 
@@ -1283,13 +1485,14 @@ document
   );
 
 
-document
-  .getElementById("incidentModal")
-  .addEventListener(
+  incidentModal.addEventListener(
     "click",
-    function(e) {
+    event => {
 
-      if (e.target === this) {
+      if (
+        event.target ===
+        incidentModal
+      ) {
 
         closeIncident();
 
@@ -1297,15 +1500,6 @@ document
 
     }
   );
-
-
-/* ========================================
-   초기 실행
-======================================== */
-
-updateScore();
-
-renderIncidents();
 
 </script>
 
