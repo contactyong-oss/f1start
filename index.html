@@ -390,6 +390,97 @@
       }
 
     }
+/* ========================================
+   POSSIBILITY LEVEL COLORS
+======================================== */
+
+.score-fill,
+.score-number,
+.score-percent,
+.score-status {
+  transition:
+    color 0.4s ease,
+    background-color 0.4s ease;
+}
+
+
+/* 50% */
+
+.level-50 .score-fill {
+  background: #f2c94c;
+}
+
+.level-50 .score-number,
+.level-50 .score-percent,
+.level-50 .score-status {
+  color: #b58b00;
+}
+
+
+/* 60% */
+
+.level-60 .score-fill {
+  background: #f2994a;
+}
+
+.level-60 .score-number,
+.level-60 .score-percent,
+.level-60 .score-status {
+  color: #d66b00;
+}
+
+
+/* 70% */
+
+.level-70 .score-fill {
+  background: #eb5757;
+}
+
+.level-70 .score-number,
+.level-70 .score-percent,
+.level-70 .score-status {
+  color: #d32f2f;
+}
+
+
+/* 80% */
+
+.level-80 .score-fill {
+  background: #d32f2f;
+}
+
+.level-80 .score-number,
+.level-80 .score-percent,
+.level-80 .score-status {
+  color: #b71c1c;
+}
+
+
+/* 90% */
+
+.level-90 .score-fill {
+  background: #8b0000;
+}
+
+.level-90 .score-number,
+.level-90 .score-percent,
+.level-90 .score-status {
+  color: #650000;
+}
+
+
+/* 100% */
+
+.level-100 .score-fill {
+  background: #4a0000;
+}
+
+.level-100 .score-number,
+.level-100 .score-percent,
+.level-100 .score-status {
+  color: #4a0000;
+}
+    
   </style>
 </head>
 
@@ -805,7 +896,32 @@
 
     const target =
       Math.min(100, currentScore);
+    
+    const scoreCard =
+    document.querySelector(".score-card");
 
+  scoreCard.classList.remove(
+    "level-50",
+    "level-60",
+    "level-70",
+    "level-80",
+    "level-90",
+    "level-100"
+  );
+
+  if (target >= 100) {
+    scoreCard.classList.add("level-100");
+  } else if (target >= 90) {
+    scoreCard.classList.add("level-90");
+  } else if (target >= 80) {
+    scoreCard.classList.add("level-80");
+  } else if (target >= 70) {
+    scoreCard.classList.add("level-70");
+  } else if (target >= 60) {
+    scoreCard.classList.add("level-60");
+  } else if (target >= 50) {
+    scoreCard.classList.add("level-50");
+  }
 
     if (
       animateFrom !== null &&
